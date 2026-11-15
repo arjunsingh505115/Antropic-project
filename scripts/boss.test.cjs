@@ -40,6 +40,32 @@ const assert = require('node:assert/strict'); const fs = require('node:fs'); con
   assert.equal((await (await fetch(`${base}/api/boss`, { headers: H })).json()).messages.length, 2);
   await fetch(`${base}/api/boss/clear`, { method: 'POST', headers: H });
   assert.equal((await (await fetch(`${base}/api/boss`, { headers: H })).json()).messages.length, 0);
+  // ▶️ chat se kaam: only whitelisted actions, only after the owner's tap (act endpoint + token), one-time ids
+  let next = 'Theek hai, keys dikhata hoon — button dabao.\nACTION: {"do":"keys"}';
+  const aiA = { lastUsed: 'fake/m1', generate: async () => next };
+  const { server: s2, token: t2 } = createPanel({ getAi: () => aiA, status: async () => ({}) });
+  await new Promise((res) => s2.listen(0, '127.0.0.1', res)); const b2 = `http://127.0.0.1:${s2.address().port}`;
+  const H2 = { 'content-type': 'application/json', 'x-panel-token': t2 };
+  const r1 = await (await fetch(`${b2}/api/boss`, { method: 'POST', headers: H2, body: JSON.stringify({ message: 'meri keys dikhao' }) })).json();
+  assert.equal(r1.action.do, 'keys'); assert.doesNotMatch(r1.reply, /ACTION:/);
+  assert.equal((await fetch(`${b2}/api/boss/act`, { method: 'POST', body: JSON.stringify({ id: r1.action.id }) })).status, 403);
+  const done = await (await fetch(`${b2}/api/boss/act`, { method: 'POST', headers: H2, body: JSON.stringify({ id: r1.action.id }) })).json();
+  assert.match(done.result, /OPENROUTER_API_KEY/); assert.ok(!done.result.includes(SECRET), 'key value leaked');
+  assert.match((await (await fetch(`${b2}/api/boss/act`, { method: 'POST', headers: H2, body: JSON.stringify({ id: r1.action.id }) })).json()).error, /yaad nahi/); // one-time
+  next = 'ok\nACTION: {"do":"rm -rf","text":"/"}';
+  assert.equal((await (await fetch(`${b2}/api/boss`, { method: 'POST', headers: H2, body: JSON.stringify({ message: 'x' }) })).json()).action, null);
+  next = 'ok\nACTION: {"do":"order"}';                                                     // order without text → no button
+  assert.equal((await (await fetch(`${b2}/api/boss`, { method: 'POST', headers: H2, body: JSON.stringify({ message: 'x' }) })).json()).action, null);
+  s2.close();
+  next = 'Research bhejta hoon.\nACTION: {"do":"order","text":"research: Toonistaan  3D tools"}';
+  const r2 = await boss.reply(aiA, 'research karwao');
+  let sent = '';
+  const out2 = await boss.runAction(r2.action.id, { cloud: { order: async (t) => { sent = t; return '📨 Aadesh bhej diya ✅'; } } });
+  assert.equal(sent, 'research: Toonistaan 3D tools'); assert.match(out2.result, /bhej diya/);
+  assert.match(boss.readActivity().join('\n'), /Boss chat se/);
+  next = 'Check karta hoon\nACTION: {"do":"test"}';
+  const r3 = await boss.reply(aiA, 'tests chalao');
+  assert.match((await boss.runAction(r3.action.id, { runTests: async () => '✅ A TESTS PASSED\nnoise\nSab tests pass 💪' })).result, /Sab tests pass/);
   server.close();
   // daily quota (Gemini style) → rests ~3 hours; plain 429 → 15 min
   const http = require('node:http');

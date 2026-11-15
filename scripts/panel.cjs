@@ -106,7 +106,8 @@ const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[
 function bubble(role,text,by){const c=$('chat');if(c.querySelector('i'))c.innerHTML='';const d=document.createElement('div');d.className='m '+(role==='user'?'me':'bo');d.innerHTML=esc(text)+(by?'<div class="by">'+esc(by)+'</div>':'');c.appendChild(d);c.scrollTop=c.scrollHeight;return d}
 async function loadChat(){try{const j=await api('/api/boss');if(j.messages.length){$('chat').innerHTML='';j.messages.forEach(m=>bubble(m.role,m.text,m.by))}}catch(e){}}
 let busy=false;
-async function talk(q){if(busy)return;const t=(q||$('bm').value).trim();if(!t)return;$('bm').value='';bubble('user',t);const w=bubble('boss','⏳ Boss soch raha hai… (free AI mein kabhi 1 minute tak)');busy=true;try{const j=await api('/api/boss',{method:'POST',body:JSON.stringify({message:t})});w.innerHTML=esc(j.reply)+'<div class="by">'+esc(j.by||'')+'</div>'}catch(e){w.textContent='❌ '+e.message}busy=false;$('chat').scrollTop=$('chat').scrollHeight}
+async function talk(q){if(busy)return;const t=(q||$('bm').value).trim();if(!t)return;$('bm').value='';bubble('user',t);const w=bubble('boss','⏳ Boss soch raha hai… (free AI mein kabhi 1 minute tak)');busy=true;try{const j=await api('/api/boss',{method:'POST',body:JSON.stringify({message:t})});w.innerHTML=esc(j.reply)+'<div class="by">'+esc(j.by||'')+'</div>';if(j.action){const b=document.createElement('button');b.className='b ai';b.style.marginTop='8px';b.textContent='▶️ Haan, karo: '+j.action.label;b.onclick=()=>act(j.action.id,b);w.appendChild(b)}}catch(e){w.textContent='❌ '+e.message}busy=false;$('chat').scrollTop=$('chat').scrollHeight}
+async function act(id,b){b.disabled=true;b.textContent='⏳ Kar raha hoon… (tests/AI mein kuch minute lag sakte hain)';const w=bubble('boss','⏳ kaam chal raha hai…');try{const j=await api('/api/boss/act',{method:'POST',body:JSON.stringify({id})});w.textContent=j.result;b.textContent='✅ Ho gaya';inboxLoad(0)}catch(e){w.textContent='❌ '+e.message;b.textContent='❌ Nahi hua'}$('chat').scrollTop=$('chat').scrollHeight}
 async function clearChat(){if(!confirm('Saari baatcheet mitaun?'))return;try{await api('/api/boss/clear',{method:'POST'});$('chat').innerHTML='<i style="color:#888">Saaf. Naya kuch poocho.</i>'}catch(e){}}
 const IC={research:'🔎',upgrade:'🧬',banaya:'🛠️',agent:'🤖',job:'🧩',seekha:'📚',sujhav:'💡',jawab:'💬',kaam:'⚙️'};
 const seen=()=>{try{return localStorage.getItem('oy-seen')||''}catch(e){return ''}};
@@ -192,6 +193,7 @@ function createPanel({ token = crypto.randomBytes(16).toString('hex'), getAi, st
                 return send(200, { ok: true });
             }
             if (url.pathname === '/api/boss') return send(200, await require('./boss.cjs').reply(getAi(), body.message));
+            if (url.pathname === '/api/boss/act') return send(200, await require('./boss.cjs').runAction(body.id));
             if (url.pathname === '/api/boss/clear') { require('./boss.cjs').clear(); return send(200, { ok: true }); }
             if (url.pathname === '/api/dimaag/improve') {
                 if (!String(body.instruction || '').trim()) return send(400, { error: 'instruction chahiye' });
