@@ -31,7 +31,7 @@ if (cmd === 'ask') {
   if (/JSON array/.test(q)) console.log('[{"kind":"known","text":"tests"},{"kind":"shell","text":"touch HACKED"},{"kind":"known","text":"rm -rf"},{"kind":"ask","text":"plan likho"}]');
   else if (/- \\[ \\] /.test(q)) console.log('- [ ] seekho: shorts trends\\n- [ ] sujhav: thumbnails\\n- [ ] likho: plan\\n- [ ] extra wala');
   else if (/3 tez, practical sawaal/.test(q)) console.log('1. Sabse naya free tool kaun sa hai?\\n2. Phone par kaise chalega?\\n3. Limit kya hai?');
-  else if (/Research karo/.test(q)) { if (rest[0] !== '--web') throw new Error('research must use web'); console.log('## Saar\\nRESEARCH OK\\n## Sources\\nhttps://example.org'); }
+  else if (/Research karo/.test(q)) { if (rest[0] !== '--web' || rest[1] !== '--query' || rest[2].length > 160) throw new Error('research must use web with a short query'); console.log('## Saar\\nRESEARCH OK\\n## Sources\\nhttps://example.org'); }
   else { console.error('🤖 jawab: fake/m1'); console.log('AI JAWAB OK'); }
 } else if (['khud', 'banao', 'kaam'].includes(cmd)) {
   fs.writeFileSync('engine-touched.txt', 'x');                       // a stray change that must NOT stay on main

@@ -220,8 +220,8 @@ def light(question, budget, role="", web=False):
     if not budget.take("ask"):
         return False, WAIT, False
     q = f"Tum OpenYug ho ({role or OWNER + ' ka agent'}). Simple Hinglish mein chhota, kaam ka jawab do.\n\n{question}"
-    ans = engine.ask(q, web=web)
-    return bool(ans), ans or "AI se jawab nahi aaya (sab AI busy/limit) — agli baar", bool(ans)
+    ans = engine.ask(q, web=web, query=question[:160])
+    return bool(ans), ans or f"AI se jawab nahi aaya — agli baar. Wajah: {engine.LAST_ERROR or 'sab AI busy/limit'}", bool(ans)
 
 
 def write_suggestions(topic, budget, role=""):
@@ -287,9 +287,10 @@ def research(topic, budget, role=""):
     ans = engine.ask(f"Research karo (web dekh kar, taaza jaankari) aur {OWNER} ke liye gehra par saaf jawab do, simple Hinglish mein.\n"
                      f"Vishay: {topic}\nMukhya sawaal: {qs[0]}\nBaaki sawaal (chhota jawab): {'; '.join(qs[1:])}\n\n"
                      "Format:\n## Saar (3 line)\n## Kya naya hai\n## Kaise use karein (steps, free tools, limits)\n"
-                     "## Hamare system mein kya jod sakte hain (ek 'sudhaar: ...' aadesh bhi likho)\n## Sources (links)", web=True)
+                     "## Hamare system mein kya jod sakte hain (ek 'sudhaar: ...' aadesh bhi likho)\n## Sources (links)",
+                     web=True, query=f"{topic} {qs[0]}")
     if not ans:
-        return False, "AI/web se jawab nahi aaya — research agli baar", False
+        return False, f"AI se research nahi bani — agli baar. Wajah: {engine.LAST_ERROR or 'pata nahi'}", False
     os.makedirs(RESEARCH, exist_ok=True)
     name = f"{NOW[:10]}-{slug(topic, 50)}.md"
     body = f"# Research: {topic}\n\n_{NOW} · OpenYug_\n\n**Sawaal jo maine khud se poochhe:**\n" + "\n".join(f"- {q}" for q in qs) + f"\n\n{ans}\n"

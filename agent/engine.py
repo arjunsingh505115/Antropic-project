@@ -87,10 +87,18 @@ def pr_link(text):
     return m[-1] if m else ""
 
 
-def ask(question, timeout=240, web=False):
-    ok, out = _run(["ask", "--web" if web else "--no-web", question], timeout)
+LAST_ERROR = ""
+
+
+def ask(question, timeout=240, web=False, query=""):
+    """AI jawab ('' agar sab AI fail). Fail ki wajah: engine.LAST_ERROR."""
+    global LAST_ERROR
+    args = ["ask", "--web" if web else "--no-web"] + (["--query", query[:160]] if web and query else []) + [question]
+    ok, out = _run(args, timeout)
     if not ok:
+        LAST_ERROR = tail(out, 4)[-400:]
         return ""
+    LAST_ERROR = ""
     # stdout = jawab; stderr lines (🤖 jawab: …) hata do
     ans = [l for l in out.splitlines() if not l.strip().startswith(("🤖", "↪", "🛡️", "🌐"))]
     return "\n".join(ans).strip()
