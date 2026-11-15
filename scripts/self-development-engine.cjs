@@ -33,6 +33,7 @@ const DEFAULT_PROTECTED = [
     /(^|\/)\.git(\/|$)/,
     /(^|\/)node_modules(\/|$)/,
     /(^|\/)\.self-upgrade-(backups|proposals)(\/|$)/,
+    /(^|\/)\.github\/workflows\//, // CI ka code sirf Arjun badle (cloud token bhi isse push nahi kar sakta)
     /secret/i,
     /(^|\/)id_(rsa|ed25519)/,
     /\.(pem|key|p12)$/i,

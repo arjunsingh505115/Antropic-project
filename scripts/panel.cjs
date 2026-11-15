@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Arjun Panel — phone browser page with the big red 🧠 DIMAAG button.
+ * Arjun Panel — phone browser page: 💬 Boss inbox (normal baat) + the big red 🧠 DIMAAG button.
  *   node self-upgrade.cjs panel   →  open the printed link in Chrome
  * Only this device can open it (127.0.0.1) and the link carries a secret token.
  */
@@ -29,9 +29,29 @@ const PAGE = (token) => `<!doctype html>
   h3{margin:22px 0 8px;color:#ff8a80}
   #msg{position:sticky;top:0;z-index:5;background:#111;min-height:22px;color:#aed581;margin:8px 0;padding:8px 0;border-bottom:1px solid #2a2a2a}
   #hist div{display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #2a2a2a;font-size:13px}
+  #boss{max-width:820px;margin:auto;padding:0 14px}
+  #chat{background:#161616;border:1px solid #333;border-radius:12px;padding:10px;height:42vh;overflow:auto;font-size:15px;line-height:1.45}
+  .m{margin:8px 0;padding:9px 12px;border-radius:12px;white-space:pre-wrap;max-width:88%;word-wrap:break-word}
+  .card{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:10px 12px;margin:8px 0}
+  .card.new{border-color:#66bb6a}.card .t{font-weight:700}.card .w{font-size:11px;color:#888;margin:2px 0 6px}
+  .card .x{white-space:pre-wrap;font-size:14px;line-height:1.45;max-height:7.5em;overflow:hidden}.card.open .x{max-height:none}
+  .card a{color:#90caf9}
+  .me{background:#1b5e20;margin-left:auto}.bo{background:#262626}.by{font-size:11px;color:#888;margin-top:3px}
   pre{white-space:pre-wrap;background:#1c1c1c;padding:10px;border-radius:10px;font-size:13px;max-height:30vh;overflow:auto}
 </style></head><body>
 <header>Arjun Agents · Panel</header>
+<div id="ibx" style="max-width:820px;margin:auto;padding:0 14px">
+  <h3>📥 Inbox — jab aap nahi the, OpenYug ne kya kiya</h3>
+  <div class="row"><button class="b grey" onclick="inboxLoad(1)">🔄 GitHub se taaza laao</button></div>
+  <div id="ist" style="font-size:12px;color:#888"></div>
+  <div id="ilist"><i style="color:#888">Load ho raha hai…</i></div>
+</div>
+<div id="boss">
+  <h3>💬 Boss se baat karo</h3>
+  <div id="chat"><i style="color:#888">Kuch bhi poocho: "kya chal raha hai?", "kaun sa AI chal raha hai?", "aaj kya seekha?", "app kaise banwaun?"</i></div>
+  <div class="row"><input id="bm" placeholder="Boss ko likho…" onkeydown="if(event.key==='Enter')talk()"><button class="b ai" style="flex:0;min-width:90px" onclick="talk()">Bhejo</button></div>
+  <div class="row"><button class="b grey" onclick="talk('Abhi kya chal raha hai? Saare AI ka haal aur taaza kaam batao.')">📋 Kya chal raha hai?</button><button class="b grey" style="flex:0;min-width:110px" onclick="clearChat()">🗑️ Saaf</button></div>
+</div>
 <button id="big" onclick="toggle()">🧠<br>DIMAAG</button>
 <section id="s">
   <div id="msg"></div>
@@ -82,6 +102,21 @@ async function accept(){try{await api('/api/dimaag',{method:'POST',body:JSON.str
 function hideProp(){$('prop').style.display='none'}
 async function restore(v){if(!confirm('Ye version wapas lagaun?'))return;try{await api('/api/dimaag/restore',{method:'POST',body:JSON.stringify({name:v})});say('✅ Purana version wapas');load()}catch(e){say('❌ '+e.message)}}
 async function resetIt(){if(!confirm('Shuruati script lagaun? (abhi wali history mein bachi rahegi)'))return;try{await api('/api/dimaag/reset',{method:'POST'});say('✅ Reset');load()}catch(e){say('❌ '+e.message)}}
+const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function bubble(role,text,by){const c=$('chat');if(c.querySelector('i'))c.innerHTML='';const d=document.createElement('div');d.className='m '+(role==='user'?'me':'bo');d.innerHTML=esc(text)+(by?'<div class="by">'+esc(by)+'</div>':'');c.appendChild(d);c.scrollTop=c.scrollHeight;return d}
+async function loadChat(){try{const j=await api('/api/boss');if(j.messages.length){$('chat').innerHTML='';j.messages.forEach(m=>bubble(m.role,m.text,m.by))}}catch(e){}}
+let busy=false;
+async function talk(q){if(busy)return;const t=(q||$('bm').value).trim();if(!t)return;$('bm').value='';bubble('user',t);const w=bubble('boss','⏳ Boss soch raha hai… (free AI mein kabhi 1 minute tak)');busy=true;try{const j=await api('/api/boss',{method:'POST',body:JSON.stringify({message:t})});w.innerHTML=esc(j.reply)+'<div class="by">'+esc(j.by||'')+'</div>'}catch(e){w.textContent='❌ '+e.message}busy=false;$('chat').scrollTop=$('chat').scrollHeight}
+async function clearChat(){if(!confirm('Saari baatcheet mitaun?'))return;try{await api('/api/boss/clear',{method:'POST'});$('chat').innerHTML='<i style="color:#888">Saaf. Naya kuch poocho.</i>'}catch(e){}}
+const IC={research:'🔎',upgrade:'🧬',banaya:'🛠️',agent:'🤖',job:'🧩',seekha:'📚',sujhav:'💡',jawab:'💬',kaam:'⚙️'};
+const seen=()=>{try{return localStorage.getItem('oy-seen')||''}catch(e){return ''}};
+function ago(t){const m=Math.round((Date.now()-Date.parse(t))/60000);return m<60?m+' min pehle':m<1440?Math.round(m/60)+' ghante pehle':Math.round(m/1440)+' din pehle'}
+async function inboxLoad(fresh){$('ist').textContent=fresh?'⏳ GitHub se la raha hoon…':'';try{const j=await api('/api/inbox'+(fresh?'?refresh=1':''));
+ const s=seen();$('ist').textContent=fresh?(j.fresh?'✅ Taaza — '+new Date().toLocaleTimeString():'⚠️ Taaza nahi la paya ('+(j.error||'')+') — purana dikha raha hoon'):'';
+ $('ilist').innerHTML=j.items.length?j.items.map((e,i)=>'<div class="card'+(e.at>s?' new':'')+'" onclick="this.classList.toggle(\\'open\\')"><div class="t">'+(IC[e.kind]||'•')+' '+(e.at>s?'🆕 ':'')+esc(e.title)+'</div><div class="w">'+esc(e.kind)+' · '+ago(e.at)+'</div><div class="x">'+esc(e.text)+'</div>'+(e.pr?'<div style="margin-top:6px"><a href="'+esc(e.pr)+'" target="_blank">🔀 Pull Request dekho / Merge karo</a></div>':'')+'</div>').join(''):'<i style="color:#888">Abhi kuch nahi. OpenYug ka pehla GitHub run hone do (ya Termux: ai cloud order "research: ...").</i>';
+ if(fresh&&j.items[0]){try{setTimeout(()=>localStorage.setItem('oy-seen',j.items[0].at),4000)}catch(e){}}}catch(e){$('ist').textContent='❌ '+e.message}}
+inboxLoad(0).then(()=>inboxLoad(1));setInterval(()=>inboxLoad(1),5*60*1000);
+loadChat();
 </script></body></html>`;
 
 function readJson(req) {
@@ -110,6 +145,12 @@ function createPanel({ token = crypto.randomBytes(16).toString('hex'), getAi, st
                 const { listProviders } = require('./providers.cjs');
                 return send(200, { saved, providers: listProviders().map((p) => ({ name: p.name, region: p.region, free: p.free, connected: p.connected, link: p.link })) });
             }
+            if (req.method === 'GET' && url.pathname === '/api/inbox') {
+                const c = require('./cloud.cjs');
+                const r = url.searchParams.get('refresh') === '1' ? await c.refresh() : { fresh: false };
+                return send(200, { ...r, items: c.inbox(80) });
+            }
+            if (req.method === 'GET' && url.pathname === '/api/boss') return send(200, { messages: require('./boss.cjs').history(60) });
             if (req.method === 'GET' && url.pathname === '/api/status') return send(200, status ? await status() : { providers: [], tools: [], yaad: '' });
             if (req.method !== 'POST') return send(404, { error: 'nahi mila' });
             const body = await readJson(req);
@@ -150,6 +191,8 @@ function createPanel({ token = crypto.randomBytes(16).toString('hex'), getAi, st
                 k.writeFileKeys(saved);
                 return send(200, { ok: true });
             }
+            if (url.pathname === '/api/boss') return send(200, await require('./boss.cjs').reply(getAi(), body.message));
+            if (url.pathname === '/api/boss/clear') { require('./boss.cjs').clear(); return send(200, { ok: true }); }
             if (url.pathname === '/api/dimaag/improve') {
                 if (!String(body.instruction || '').trim()) return send(400, { error: 'instruction chahiye' });
                 return send(200, { proposal: await dimaag.improve(getAi(), String(body.instruction)) });

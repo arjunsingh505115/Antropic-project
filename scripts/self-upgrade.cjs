@@ -8,6 +8,7 @@
  *   node self-upgrade.cjs phone info|apps|halka <app>|wapas <app>|sab-wapas   # ADB (bina root): jaankari, apps band/chalu, sab undo
  *   node self-upgrade.cjs backup                     # sab kuch taala-band (password) backup: phone + Downloads + GitHub
  *   node self-upgrade.cjs restore [file]             # naye phone par sab wapas (GitHub se ya file se)
+ *   node self-upgrade.cjs cloud [order ".."|agent "naam - kaam"|bhejo]  # ☁️ OpenYug: GitHub par chalne wala agent — haal / aadesh
  *   node self-upgrade.cjs panel [band|fg]            # 🔴 (background; 'panel band' = rokna) phone browser mein laal DIMAAG button: script dekho/badlo/AI se advance/purana wapas
  *   node self-upgrade.cjs dimaag [badlo|sudhaaro ".."|versions|wapas <v>|reset]
  *   node self-upgrade.cjs khud "kya sudhaarna hai"   # ENGINE KHUD KO SUDHAARE (apna code; saare tests safety net)
@@ -78,23 +79,46 @@ function makeCodeApproval(io) {
     };
 }
 
+/**
+ * Cloud mode (GitHub Actions / OpenYug): no human can type "haan" there.
+ * Code changes are still allowed ONLY because they never land on main: the engine
+ * puts them on a new branch + Pull Request, and the owner's Merge is the "haan".
+ * Safety files, new connections, new tool code and untrusted tools are always refused in the cloud.
+ */
+const isCloud = () => process.env.ARJUN_CLOUD === '1';
+const cloudApprovals = () => require('./cloud.cjs').approvals(SAFETY_FILES);
+
 async function runBrain(goal, root, extra = {}) {
+    const cloud = isCloud();
+    // in the cloud, work on the engine's own repo always runs the full self-test suite
+    if (cloud && !extra.testCommand && require('node:path').resolve(root) === require('node:path').resolve(__dirname, '..')) {
+        extra = { ...extra, testCommand: [process.execPath, [require('node:path').join(__dirname, 'self-upgrade.cjs'), 'test']] };
+    }
     const engine = new SelfDevelopmentEngine({ root, ...extra });
     await engine.initialize();
     const ai = createProvider();
     await engine.connectAI(ai);
-    const io = keys.hiddenInterface();
+    const io = cloud ? { ask: async () => '', close() {} } : keys.hiddenInterface();
     const yes = async (q) => /^(h|haan|y|yes)$/i.test((await io.ask(`${q} (haan/nahi): `)).trim());
-    const approve = {
+    const approve = cloud ? cloudApprovals() : {
         code: makeCodeApproval(io),
         tool: async (t, input) => yes(`\n🔧 Tool "${t.name}" (${t.kind}) chalana hai, input: ${JSON.stringify(input).slice(0, 300)}\n   Chalaun?`),
         connect: async (c) => yes(`\n🔌 "${c.name}" jodna hai: ${c.description} (${c.link})\n   Jod doon?`),
         newTool: async (code, risky) => { console.log(`\n----- naya tool code -----\n${code}\n--------------------------`); if (risky.length) console.log(`⚠️ Dhyan do, code mein: ${risky.join(', ')}`); return yes('Ye tool save karun?'); },
     };
-    const brain = require('./brain.cjs').createBrain({ ai, root: engine.root, engine, tools: require('./tools.cjs'), web, approve, ask: (q) => io.ask(`\n❓ ${q}\n> `), log: (l) => console.log(l) });
+    const askOwner = cloud
+        ? async () => 'Arjun abhi online nahi hai (cloud run). Apni samajh se SAFE raasta lo; zaroori sawaal ho to finish karke answer mein sawaal likh do.'
+        : (q) => io.ask(`\n❓ ${q}\n> `);
+    const brain = require('./brain.cjs').createBrain({ ai, root: engine.root, engine, tools: require('./tools.cjs'), web, approve, ask: askOwner, log: (l) => { console.log(l); boss.activity(l); } });
+    const boss = require('./boss.cjs');
+    boss.activity(`▶️ Kaam shuru: ${goal.split('\n')[0].slice(0, 200)}`);
     try {
         const r = await brain.kaam(goal);
         console.log(`\n${r.done ? '✅' : '⏸️'} ${r.answer}`);
+        boss.activity(`${r.done ? '✅ Kaam poora' : '⏸️ Kaam adhoora'}: ${String(r.answer).slice(0, 300)}`);
+    } catch (error) {
+        boss.activity(`❌ Kaam ruka: ${error.message.slice(0, 300)}`);
+        throw error;
     } finally {
         io.close();
     }
@@ -416,6 +440,16 @@ include README.md in simple Hinglish (kaise chalayein, phone/Termux aur PC dono 
         return runBrain(`Improve this engine itself (its own source code): ${text}
 Keep every safety feature (approval, backups, rollback, Data Kavach, protected paths, locks) working; add or update a *.test.cjs for anything new.`, root, { testCommand });
     }
+    if (command === 'cloud') {
+        // ☁️ OpenYug: GitHub par chalne wala agent
+        const c = require('./cloud.cjs');
+        const [sub, ...more] = rest;
+        if (sub === 'order' || sub === 'aadesh') return console.log(await c.order(more.join(' ')));
+        if (sub === 'agent') return console.log(await c.order(`agent banao: ${more.join(' ')}`));
+        if (sub === 'bhejo' || sub === 'sync' || sub === 'push') return console.log(await c.sync());
+        if (!sub || sub === 'report' || sub === 'haal') return console.log(await c.status());
+        throw new Error('Aise: cloud | cloud order "sudhaar: ..." | cloud agent "naam - kaam" | cloud bhejo');
+    }
     if (command === 'github') {
         if (rest[0] !== 'clone') throw new Error('Aise likho: github clone owner/repo [folder]');
         const dir = await require('./git.cjs').clone(rest[1], rest[2]);
@@ -488,7 +522,7 @@ Keep every safety feature (approval, backups, rollback, Data Kavach, protected p
             console.log(JSON.stringify(await engine.restoreBackup(rest[0]), null, 2));
             break;
         default:
-            console.log('Commands: phone info|apps|halka|wapas|sab-wapas | backup | restore [file] | panel (🔴 DIMAAG) | dimaag [badlo|sudhaaro|versions|wapas|reset] | test | khud "<sudhaar>" | banao "<app>" --root <folder> | kaam "<goal>" | connect search/list/add | tool run/banao | yaad | doctor | gateway | github clone owner/repo | keys | keys list | models | ask "<sawaal>" [--web] | status | run "<instruction>" [--web] | propose "<instruction>" | apply <id> | restore <backupId>\nOptions: --provider <naam|auto|a,b,c>  --private  --web  --root <folder>');
+            console.log('Commands: phone info|apps|halka|wapas|sab-wapas | backup | restore [file] | cloud [order "…" | agent "naam - kaam"] (☁️ OpenYug) | panel (🔴 DIMAAG) | dimaag [badlo|sudhaaro|versions|wapas|reset] | test | khud "<sudhaar>" | banao "<app>" --root <folder> | kaam "<goal>" | connect search/list/add | tool run/banao | yaad | doctor | gateway | github clone owner/repo | keys | keys list | models | ask "<sawaal>" [--web] | status | run "<instruction>" [--web] | propose "<instruction>" | apply <id> | restore <backupId>\nOptions: --provider <naam|auto|a,b,c>  --private  --web  --root <folder>');
             process.exitCode = command ? 2 : 0;
     }
 }

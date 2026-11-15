@@ -65,8 +65,10 @@ function createBrain({ ai, root, engine, tools, web, ask, approve, log = () => {
             case 'change_code': {
                 const r = await engine.upgrade(String(input.instruction || ''), approve.code);
                 if (!r.success) return `Badlav nahi laga: ${r.message || ''} ${r.lastError || ''}`.trim();
-                const g = r.git && r.git.branch ? ` Git branch ${r.git.branch}${r.git.pr ? `, PR ${r.git.pr}` : ''}.` : '';
-                return `Ho gaya: ${r.summary}. Files: ${r.updatedFiles.join(', ')}. Tests pass.${g}`;
+                const g = r.git && r.git.branch ? ` Git branch ${r.git.branch}${r.git.pr ? `, PR ${r.git.pr}` : ''}${r.git.pushError ? ` (push nahi hua: ${r.git.pushError})` : ''}${r.git.prError ? ` (PR nahi bana: ${r.git.prError})` : ''}.` : '';
+                const done = `Ho gaya: ${r.summary}. Files: ${r.updatedFiles.join(', ')}. Tests pass.${g}`;
+                log(`   ↳ ${done}`);
+                return done;
             }
             case 'list_tools':
                 return tools.listTools().map((t) => `- ${t.name} (${t.kind}): ${t.description || ''}`).join('\n') || '(abhi koi tool juda nahi — find_tools / connect_tool / create_tool use karo)';

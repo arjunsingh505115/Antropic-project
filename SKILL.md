@@ -63,7 +63,8 @@ mode for anything the owner calls personal.
 ```bash
 node "$S/self-upgrade.cjs" backup | restore              # encrypted backup of everything personal (GitHub/Downloads)
 node "$S/self-upgrade.cjs" phone info|apps|halka|wapas   # owner's own phone via ADB (no root); reversible only
-node "$S/self-upgrade.cjs" panel                          # owner's red DIMAAG button (edit/improve/rollback the brain script)
+node "$S/self-upgrade.cjs" cloud [order ".."]               # ☁️ OpenYug: GitHub par chalne wala agent (agent/README.md)
+node "$S/self-upgrade.cjs" panel                          # 💬 Boss inbox (chat about status/activity) + owner's red DIMAAG button (edit/improve/rollback the brain script)
 node "$S/self-upgrade.cjs" khud "<improvement>"                # engine improves ITSELF (own tests = safety net)
 node "$S/self-upgrade.cjs" banao "<app>" --root <new-folder>   # new software from scratch, with tests
 node "$S/self-upgrade.cjs" kaam "<goal>" --root <project>   # plans and acts step by step: web, files, change_code,

@@ -60,7 +60,10 @@ const assert = require('node:assert/strict'); const http = require('node:http');
   const gj = await (await fetch(`http://127.0.0.1:${G.address().port}/v1/chat/completions`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', content: 'hi' }] }) })).json();
   assert.equal(gj.choices[0].message.content, 'from small-chat');
   G.close(); srv2.close();
-  const all = await P.fixAll(); assert.equal(all.filter((x) => x.ok).length, 3);
+  // only this test's fake AIs — the owner's real keys may be open in the shell (e.g. after `. ~/.arjun-keys`)
+  const mine = JSON.parse(fs.readFileSync(pj, 'utf8')).map((x) => x.name);
+  const clean = Object.fromEntries(Object.entries(process.env).filter(([k]) => !/(_API_KEY|_TOKEN)$/.test(k) || /^(OLD|BUSY|BAD|OK)_KEY$/.test(k)));
+  const all = (await P.fixAll(clean)).filter((x) => mine.includes(x.name)); assert.equal(all.filter((x) => x.ok).length, 3);
   srv.close();
   // thinking models need room: the live test must not starve them of tokens
   assert.ok(/max_tokens: 512/.test(require('node:fs').readFileSync(require('node:path').join(__dirname, 'providers.cjs'), 'utf8')));

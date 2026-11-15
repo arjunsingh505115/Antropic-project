@@ -106,7 +106,9 @@ function coolingDown(env, name) {
 function noteFailure(env, name, error) {
     const m = String(error && error.message || error).match(/HTTP (\d{3})/);
     const status = m ? Number(m[1]) : (error && error.name === 'TimeoutError' ? 504 : 0);
-    if (status === 429) setHealth(env, name, { until: Date.now() + 15 * 60 * 1000, reason: 'free limit khatam' });
+    // a DAILY quota (e.g. Gemini "exceeded your current quota") won't come back in minutes — rest it longer so every step stops waiting on it
+    const daily = /quota|per.?day|daily|PerDay|RPD/i.test(String(error && error.message || ''));
+    if (status === 429) setHealth(env, name, { until: Date.now() + (daily ? 3 * 60 : 15) * 60 * 1000, reason: daily ? 'aaj ki free limit khatam' : 'free limit khatam' });
     else if (status >= 500 || status === 0) setHealth(env, name, { until: Date.now() + 5 * 60 * 1000, reason: 'server busy/network' });
     else if ([400, 401, 403].includes(status)) setHealth(env, name, { until: Date.now() + 60 * 60 * 1000, reason: 'key galat' });
 }
