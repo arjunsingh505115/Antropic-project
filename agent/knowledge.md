@@ -241,3 +241,8 @@ _Ye file OpenYug khud bharta hai. Har run par naya hissa neeche judta hai._
 - Actions for ARM32 Linux &#038; Windows retirement
 
 **Sabak:** **1. Show HN: PongArena – Play Pong and see how tiny neural networks think**   > Naya: Ek simple Pong game jo 10‑node neural nets se chalaya ja raha hai, taaki hum dekh saken ki chhote models ka learning style kaisa hota hai.   > Dev ke liye: Agar aap reinforcement learning ya edge AI pe kaam kar rahe hain, to ek tangible demo milega jisse model complexity ko kaise balance karna hai samajh mein aayega.   > Take‑away: Experiment karo — custom env change karo, reward tweaks karo, aur dekho kaunsa architecture sabse efficient rehta hai.  **2. The Oldest Text in the Training Data**   > Naya: Resea
+
+## 2026-11-16 — research: self-evolving AI agents: naye tareeke, open-source projects aur free tools
+
+(web se taaza jaankari nahi mili — ye AI ki apni jaankari hai) ## Saar (3 line) Self‑evolving AI agents ab “agentic LLMs” ke naam se jaane jaate hain – ye apne aap ko train, plan aur execute kar sakte hain. Open‑source tools jaise AutoGPT, BabyAGI, LangChain + ReAct, aur DeepMind ka Self‑Driving Agent sabse zyada active hain. Aaj ka “sabse kaam ka” option hai LangChain ke ReAct framework ke saath ek lightweight AutoGPT clone – free tier pe kaam karta hai aur bahut customizable hai. ## Kya naya h
+(poora: agent/research/2026-11-16-self-evolving-ai-agents-naye-tareeke-open-source-p.md)
