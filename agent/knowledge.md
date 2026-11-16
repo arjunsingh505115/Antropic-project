@@ -246,3 +246,8 @@ _Ye file OpenYug khud bharta hai. Har run par naya hissa neeche judta hai._
 
 (web se taaza jaankari nahi mili — ye AI ki apni jaankari hai) ## Saar (3 line) Self‑evolving AI agents ab “agentic LLMs” ke naam se jaane jaate hain – ye apne aap ko train, plan aur execute kar sakte hain. Open‑source tools jaise AutoGPT, BabyAGI, LangChain + ReAct, aur DeepMind ka Self‑Driving Agent sabse zyada active hain. Aaj ka “sabse kaam ka” option hai LangChain ke ReAct framework ke saath ek lightweight AutoGPT clone – free tier pe kaam karta hai aur bahut customizable hai. ## Kya naya h
 (poora: agent/research/2026-11-16-self-evolving-ai-agents-naye-tareeke-open-source-p.md)
+
+## 2026-11-16 — research: Toonistaan ke liye free 3D cartoon tools 2026
+
+(web se taaza jaankari nahi mili — ye AI ki apni jaankari hai) ## Saar (3 line) 2026 mein cartoon banane ke liye free ya low‑cost 3D tools ka market kaafi grow ho chuka hai. Real‑time rendering aur easy character rigging ke liye Blender, Unity, Unreal Engine, Godot, aur mobile apps jaise FlipaClip, Stop Motion Studio, aur 3D modeling apps (SculptGL, SketchUp Free) top choices hain. Cloud integration aur collaborative workflows bhi inme common ho gaye hain, lekin system requirements aur mobile co
+(poora: agent/research/2026-11-16-toonistaan-ke-liye-free-3d-cartoon-tools-2026.md)

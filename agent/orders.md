@@ -6,7 +6,7 @@ Naya kaam neeche jodo — ek line me. Khatam hone par OpenYug `[x]` kar dega.
 - [ ] Har baar: data kitna purana hai batao
 - [x] Har baar: teeno site (Pages/Netlify/Vercel) + Cloudflare API check karo
 - [x] Har baar: mirror check karo — GitHub, GitLab, Codeberg, Bitbucket
-- [ ] research: Toonistaan ke liye free 3D cartoon tools 2026
+- [x] research: Toonistaan ke liye free 3D cartoon tools 2026
 
 ## Naye aadesh ke tareeke (OpenYug 2)
 - `sudhaar: ...` apna code sudhaare (PR) · `banao: ...` naya app (PR) · `kaam: ...` koi bhi goal
