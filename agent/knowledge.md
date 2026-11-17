@@ -251,3 +251,8 @@ _Ye file OpenYug khud bharta hai. Har run par naya hissa neeche judta hai._
 
 (web se taaza jaankari nahi mili — ye AI ki apni jaankari hai) ## Saar (3 line) 2026 mein cartoon banane ke liye free ya low‑cost 3D tools ka market kaafi grow ho chuka hai. Real‑time rendering aur easy character rigging ke liye Blender, Unity, Unreal Engine, Godot, aur mobile apps jaise FlipaClip, Stop Motion Studio, aur 3D modeling apps (SculptGL, SketchUp Free) top choices hain. Cloud integration aur collaborative workflows bhi inme common ho gaye hain, lekin system requirements aur mobile co
 (poora: agent/research/2026-11-16-toonistaan-ke-liye-free-3d-cartoon-tools-2026.md)
+
+## 2026-11-17 — research: naye free AI models aur free API (free tier, limits, kaise jodein)
+
+(web se taaza jaankari nahi mili — ye AI ki apni jaankari hai) ## Saar 1. Mobile‑friendly free AI models (text, image, 3D) ab edge‑friendly versions jaise **Llama‑2‑7B‑Chat‑HF**, **Stable Diffusion XL‑Tiny**, aur **Nano‑NeRF** available hain. 2. Inke free tiers (API ya local run) usually 1‑2 GB RAM, 30‑60 sec inference, aur 1‑2 k requests/month tak limit hote hain. 3. Inko ek lightweight framework (e.g., **Flutter + TensorFlow Lite** ya **React Native + ONNX Runtime**) mein bundle karke Swag app
+(poora: agent/research/2026-11-17-naye-free-ai-models-aur-free-api-free-tier-limits.md)
