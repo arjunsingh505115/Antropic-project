@@ -26,3 +26,17 @@ Ek shortcut generator create karo jo completed tasks ke liye automatically ek re
 **Idea 3**  
 Ek lightweight AI‑powered suggestion engine add karo jo Arjun Engine ke performance logs analyze kare aur har week ek “Swag ke liye seedhi baat” 3‑line summary `agent/reports/` mein push kare.  
 `sudhaar: add AI suggestion engine that analyzes Arjun Engine logs and writes a 3‑line weekly improvement note to agent/reports/`
+
+## 2026-11-23 — OpenYug aur Arjun Engine ko aur taakatwar kaise banayein
+
+**Idea 1**  
+Ek self‑learning module add karo jo har din ek random tech article read kare aur 2‑line summary `agent/knowledge.md` mein store kare.  
+`sudhaar: add self‑learning module that fetches a random tech article daily and writes a 2‑line summary to agent/knowledge.md`
+
+**Idea 2**  
+Ek shortcut generator create karo jo completed tasks ke liye automatically ek reusable command `agent/shortcuts.md` mein add kare.  
+`sudhaar: implement shortcut generator that auto‑writes reusable commands to agent/shortcuts.md after task completion`
+
+**Idea 3**  
+Ek lightweight AI‑powered suggestion engine add karo jo Arjun Engine ke performance logs analyze kare aur har week ek “Swag ke liye seedhi baat” 3‑line summary `agent/reports/` mein push kare.  
+`sudhaar: add AI suggestion engine that analyzes Arjun Engine logs and writes a 3‑line weekly improvement note to agent/reports/`
